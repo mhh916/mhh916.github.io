@@ -1,0 +1,46 @@
+  
+<html><head>
+        <meta charset="utf-8">
+        <title>Grappling Game</title>
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link type="text/css" rel="stylesheet" href="style.css">
+		<script src="./js/three.js"></script>
+		<script src="./js/ammo.js"></script>
+		<script src="./js/AmmoDebugDrawer.js"></script>
+		<script src="./js/stats.min.js"></script>
+		<script src="./js/PointerLockControls.js"></script>
+		<script src="./js/OBJLoader.js"></script>
+		<script src="./js/GLTFLoader.js"></script>
+		<script src="./js/AnimationMixer.js"></script>
+		<!-- https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/OBJLoader.js -->
+    </head>
+
+<style>h2 {text-align:center}</style>
+<body>	
+
+	<div id="blocker" style="display: block;">
+		<div id="load" style = "">
+			<span style="..."><h2>0% has loaded so far...</h2></span>
+			<br>
+		</div>
+		<div id="load_Menu" style = "">
+			<span style="..."><h2>0% has loaded so far...</h2></span>
+			<br>
+		</div>
+		<div id="instructions" style="">
+			<span style="font-size:36px">Click to play</span>
+			<br><br>
+			Move: WASD<br>
+			Jump: SPACE<br>
+			Look: MOUSE
+		</div>
+	</div>
+	<div id = "clock" style = "display: block">
+		<h1></h1>
+	</div>
+	<script src="./game/system.js"></script>
+	<script src="./game/menu.js"></script>
+	<script src="./game/level_1.js"></script>
+	<script src="./game/main.js"></script>
+
+</body></html>
