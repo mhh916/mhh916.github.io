@@ -1,0 +1,343 @@
+
+<!DOCTYPE html>
+<html>
+<!--
+   This web page shows how to do a simple animation using 2D canvas graphics.
+   It also defines functions applyWindowtoViewportTransformation, for setting
+   up a coordinate system on the canvas, and addGraphicsContextExtras, for adding
+   some extra drawing functions to a graphics context, such as functions for drawing
+   lines and ovals.  Use this page as a basis for experimenting with animation.
+-->
+<head>
+<meta charset="UTF-8">
+<title>Snake</title>
+<style>
+    /* This style section is here to make the canvas more obvious on the
+       page.  It is white on a light gray page background, with a thin
+       black border. */
+    body {
+        background-color: #DDDDDD;
+    }
+    canvas {
+        background-color: white;
+        display: block;
+    }
+    #canvasholder {
+        border:2px solid black;
+        float: left; /* This makes the border exactly fit the canvas. */
+    }
+</style>
+<script>
+
+    "use strict";  // gives improved error-checking in scripts.
+
+    var canvas;    // The canvas element on which we will draw.
+    var graphics;  // A 2D graphics context for drawing on the canvas.
+	
+    var elapsedTimeMillis;  // This will be the time since the animation started;
+                            // will be zero in the first frame.
+
+    var foodImage, headImage, tailImage, bodyImage;
+	var xIncrement = 25, yIncrement = 0;
+	var allLoaded = false;
+	var frameNumber;
+	var elapsedTimeMillis;
+	var startTime;
+	var x =25;
+	var y =0;
+	//Value to limit direction change into self
+	var lr = true;
+	//Game score
+	var score = 0;
+	var snake = [];
+	var foodX, foodY;
+	var head = [];
+	var level = 1;
+	var speed = 25;
+	var totalFood = 1;
+	var gameOn;
+	
+	//draws the snake
+    function draw() {	
+		snake.forEach(drawPart)
+    } // end of draw()
+	
+	function drawPart(snakePart){
+		var index = snake.indexOf(snakePart);
+		if(index == 0){
+		graphics.drawImage(headImage, snakePart.x, snakePart.y, 25, 25);
+		}else{
+		if(index == snake.length - 1){
+		graphics.drawImage(tailImage, snakePart.x, snakePart.y, 25, 25);
+		}else{
+		if(index != 0 || snake.length - 1){
+		graphics.drawImage(bodyImage, snakePart.x, snakePart.y, 25, 25);
+		}}}
+		
+	}
+	
+	function moveSnake(){
+		if(frameNumber % speed == 0){
+		head = {x: (snake[0].x + xIncrement), y: (snake[0].y + yIncrement)}
+		snake.unshift(head);
+		if (snake[0].x === foodX && snake[0].y === foodY){
+			score += 1;
+			makeFood();
+			putFood();
+		}else{
+			snake.pop();
+		}
+		}
+		
+	}
+	
+	function gameOver(){
+	for (let i = 2; i <= snake.length-1; i++) {
+        if (snake[i].x === snake[0].x && snake[i].y === snake[0].y)
+			return true;
+      }
+      var leftWall = snake[0].x < 0;
+      var rightWall = snake[0].x > canvas.width - 25;
+      var topWall = snake[0].y < 0;
+      var bottomWall = snake[0].y > canvas.height -25;
+	  
+	  if(leftWall|| rightWall || topWall|| bottomWall){
+	  return true;
+	  }
+	  
+      return false;
+	}
+    
+	//puts food on screen
+    function putFood(){
+		graphics.drawImage(foodImage, foodX, foodY, 25, 25);	
+	}
+	
+	//stores value of the food
+	function makeFood(){
+	foodX = Math.floor(Math.random() * 32);
+	foodX *= 25
+	foodY = Math.floor(Math.random() * 24);
+	foodY *= 25
+	//check if food is on snake.
+	}
+	
+	function setHeader(){
+		document.getElementById("score").innerHTML = "Score: " + parseInt(score);
+		document.getElementById("level").innerHTML = "Level: " + parseInt(level);
+		document.getElementById("playtime").innerHTML = "Play Time: " + parseInt(elapsedTimeMillis/1000);
+	}
+	
+	function checkLevel(){
+	level = parseInt(score/10)+1;
+	speed = 30-(level*5);
+	}
+	
+	function clear(){
+		graphics.clearRect(0,0,canvas.width,canvas.height);  // Clear the canvas, so it shows its background color.
+	}
+	//event handler for movement
+    function doKeyDown(evt) {
+        var code = evt.keyCode;  // Numerical code for key that was pressed.
+		if(lr){
+        switch (code) {
+		case 13:  // enter key
+			/*if(!gameOn){
+			gameOn = true;
+			init();
+			}*/		
+			break;
+		case 38:  // up arrow key
+			xIncrement = 0;
+			yIncrement = -25;
+			lr = false;
+		    break;
+		case 40:  // down arrow key
+			xIncrement = 0;
+			yIncrement = 25;
+			lr = false;
+		    break;
+        }
+		}else{
+		
+		switch (code) {
+			case 13:  // enter key
+				break;
+			case 37:  // left arrow key
+				xIncrement = -25;
+				yIncrement = 0;
+				lr = true;
+				break;
+			case 39:  // right arrow key
+				xIncrement = 25;
+				yIncrement = 0;
+				lr = true;
+				break;
+		}
+		}
+    }
+    
+
+    /**
+     *  Draw one frame of the animation, and call requestAnimationFrame() to arrange
+     *  for the function to be called again.
+     */
+	 
+	 /*function menu(){
+		graphics.font = "30px Arial";
+		graphics.fillStyle="#FF0000";
+		graphics.textAlign = "center";
+		graphics.fillText("Welcome to snake",canvas.width/2,canvas.height/2);
+		graphics.fillText("By: Michael Hayes",canvas.width/2,canvas.height/2+30);
+		graphics.fillText("Press enter to start",canvas.width/2,canvas.height/2+60);
+	 }
+	 
+	 function doMenu(){
+		if(inMenu){
+		clear();
+		menu();
+		requestAnimationFrame(doMenu);
+		}else{
+		console.log(inMenu);
+		return;
+		}
+		
+	 }*/
+	 
+    function doFrame() {
+        frameNumber++;
+        elapsedTimeMillis = Date.now() - startTime;
+
+		// GAME LOGIC here
+		if(gameOver()){
+			gameOn = false;
+			graphics.font = "30px Arial";
+			graphics.fillStyle="#FF0000";
+			graphics.textAlign = "center";
+			graphics.fillText("Game Over",canvas.width/2,canvas.height/2);
+			graphics.fillText("Score: " + score,canvas.width/2,canvas.height/2+30);
+			//graphics.fillText("Press enter to restart",canvas.width/2,canvas.height/2+60);
+			score = 0;
+			return;
+			
+		
+		}else{
+		gameOn = true;
+		checkLevel();
+		setHeader();
+		clear();
+		putFood();
+		moveSnake();
+		draw();
+        requestAnimationFrame(doFrame);
+		}
+    }
+    
+
+    function imageLoaded() {
+		allLoaded = true;
+    }
+
+
+
+	// this function gets called when HTML page loads
+	// canvas context gets initialized
+	// one sample image is loaded
+	// keyboard handler initialized
+	// game loop is setup
+    function init() {
+        try {
+            canvas = document.getElementById("canvas");
+            graphics = canvas.getContext("2d");
+        } catch(e) {
+            document.getElementById("canvasholder").innerHTML =
+               "Canvas graphics is not supported.<br>" +
+               "An error occurred while initializing graphics.";
+        }
+		snake = [{x: (canvas.width/2), y: (canvas.height/2)}];
+		foodImage = new Image();
+		headImage = new Image();
+		tailImage = new Image();
+		bodyImage = new Image();
+		
+		// load an image of intrinsic size 300x227 in CSS pixels
+		//https://openclipart.org/image/2400px/svg_to_png/243661/1457652300.png   
+		foodImage.src = "https://openclipart.org/image/2400px/svg_to_png/314575/1548947790.png";
+		foodImage.onload = imageLoaded();
+		bodyImage.src = "https://openclipart.org/image/2400px/svg_to_png/3097/tonlima-Olho-Azul-Blue-Eye.png";
+		bodyImage.onload = imageLoaded();
+		headImage.src = "https://openclipart.org/image/2400px/svg_to_png/283675/rejonhead.png";
+		headImage.onload = imageLoaded();
+		tailImage.src = "https://openclipart.org/image/2400px/svg_to_png/259333/ight%20ky%20agic-1.png";
+		tailImage.onload = imageLoaded();
+	
+		while(!allLoaded) { } // very risky 
+
+		// GAME INIT 
+
+		// handle keyboard
+        document.addEventListener("keydown", doKeyDown, false);
+
+        frameNumber = 0;
+        elapsedTimeMillis = 0;
+        startTime = Date.now();  // current time, in milliseconds.
+		makeFood();
+		putFood();
+		gameOn = false;
+        draw();  // Call draw() to draw on the canvas.
+        if (!window.requestAnimationFrame) { // This is for Internet Explorer 9
+            window.requestAnimationFrame = function(callback) {
+                setTimeout(callback, 1000/60);    
+            }
+        }
+        requestAnimationFrame(doFrame);
+    }
+    
+</script>
+</head>
+<body onload="init()"> <!-- the onload attribute here is what calls the init() function -->
+<div id="all">
+<div id="left" width="50%"style="float: left; ">
+<div id="header">
+<div id="name" width="25%"style="float: left; padding-bottom: 3%;">
+<h2>Snake</h2>
+</div>
+
+<div id="data" width="25%" style="float: right; padding-right: 5%;">
+<p id="playtime"></p>
+<p id="score"></p>
+<p id="level"></p>
+</div>
+
+</div>
+<noscript>
+    <!-- This message will be shown in the page if JavaScript is not available. -->
+<p>JavaScript is required to use this page.</p>
+</noscript>
+
+<div id="canvasholder" style="float: left; ">
+<canvas id="canvas" width="800" height="600">
+    <!-- This message is shown on the page if the browser doesn't support the canvas element. -->
+Canvas not supported.
+</canvas>
+</div>
+</div>
+<div id="right" width="50%" style="float: right; padding-right: 0%; padding-top: 4.2%;">
+<div id= "description" width="80%"style="float: left; border:1px solid black;" >
+<h2>Description</h2>
+<p>
+Controls:<br>
+Arrow keys to move direction.<br>
+You cannot move into yourself.<br><br>
+For every 10 foods eaten level is increased by 1.<br>
+Each level increases the movement speed of the snake.<br>
+Hitting the walls or colliding into the snake causes you to lose.
+</p>
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

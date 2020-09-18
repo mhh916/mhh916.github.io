@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<HTML>
+<head>
+<meta charset="utf-8"/>
+<title>Sanic Go Fast</title>
+</head>
+<body onload="init()">
+<audio onload = "itemLoaded()" id="sanicTheme">
+  <source src="./sanicTheme.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+<audio onload = "itemLoaded()" id="downCharge">
+  <source src="./downCharge.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+<audio onload = "itemLoaded()" id="getRing">
+  <source src="./getRing.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+<audio onload = "itemLoaded()" id="loseRing">
+  <source src="./loseRing.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+<audio onload = "itemLoaded()" id="enemyDefeated">
+  <source src="./enemyDefeated.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+<audio onload = "itemLoaded()" id="sanicDead">
+  <source src="./sonicDead.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+<audio onload = "itemLoaded()" id="gameOverTheme">
+  <source src="./sonicGameOver.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+<canvas id="canvas" width="800" height="800" style="border: 1px solid black"></canvas>
+<img id='sanic' 	src="./sanic.png"  onload ="itemLoaded()" hidden=true></img>
+<img id='sanicRoll' src="./roll.png" 	 onload ="itemLoaded()" hidden=true></img>
+<img id='ring'	 	src="./ring.png" 	 onload = "itemLoaded()" hidden=true></img>
+<img id='enemy1' 	src="./enemy1.png" onload ="itemLoaded()" hidden=true></img>
+<img id='enemy2' 	src="./enemy2.png" onload ="itemLoaded()" hidden=true></img>
+<img id='enemy3' 	src="./Enemy3.png" onload ="itemLoaded()" hidden=true></img>
+<img id='background1' 	src="./background1.png" onload = "itemLoaded()" hidden=true></img>
+<img id='background2' 	src="./background2.png" onload = "itemLoaded()" hidden=true></img>
+<div id= "description" width="80%"style="float: left; border:1px solid black;" >
+<h2>Sanic Go Fast</h2>
+<p>
+Controls:<br>
+Spacebar: Jump<br>Left Arrow: Left<br>Right Arrow: Right<br>Down Arrow: Roll Form<br>Ctrl: Charge<br><br>
+Collect coins and defeat enemies by jumping on them<br><br>
+How to charge hit:<br>
+To charge hit you must hold down key then press ctrl,<br>
+ let go of control while holding down arrow, and press either left or <br>right arrow.
+</p>
+<script>
+var canvas = document.getElementById("canvas");
+var context = canvas.getContext("2d");
+var jump = 0,
+	life = 0,
+	score = 0,
+	ringsAmount = 1,
+	maxRings = 0,
+	killCount = 0,
+	ringSize = 30,
+	enemy1Size = 50,
+	enemy2Size = 50,
+	enemy3Size = 60,
+	frame = 0,
+	levelSpeed = 1,
+	x = canvas.width/2,
+    y = canvas.height/2,
+    velY = 0,
+    velX = 0,
+    speed = 7,
+	size = 100,
+	rollSize = 50,
+	maxJump = 30,
+	jumpSpeed = 5,
+	jumpHeight = 100;
+    friction = .9,
+    key = [];
+//Audio variables
+var theme,
+	getRing,
+	loseRing,
+	downCharge,
+	sanicDead,
+	enemyDefeated,
+	gameOverTheme;
+//Image variables
+var sanic,
+	sanicRoll,
+	ring,
+	enemy1,
+	enemy2,
+	enemy3,
+	background1,
+	background2;
+//Something
+var droppedRings,
+	enemies,
+	rings,
+	loadCount;
+//Boolean variables
+var gameOver = false,
+	down = false,
+	jumpBol = false,
+	allLoaded = false,
+	charge = false,
+	jumpCD = false,
+	downHit = false;
+	
+//When all loaded starts game
+function itemLoaded() {
+	loadCount++;
+	if(loadCount = 13){
+		allLoaded = true;
+	}
+}
+
+
+function init(){
+	while(!allLoaded){}
+	//Key listener true/false if key is up or down
+	document.body.addEventListener("keydown", function (k) {
+		key[k.keyCode] = true;
+	});
+	document.body.addEventListener("keyup", function (k) {
+		key[k.keyCode] = false;
+	});
+	droppedRings = new Array();
+	//Generates random enemy placement within sky/floor position
+	enemies = new Array();
+	for(var i = 0; i < 100; i++) {	
+		var alive = true;
+		var enemyType = Math.floor(Math.random() * 3+1);
+		if(enemyType == 3){ //If enemy is land dwelling restrict to floor
+			var enemyX =  Math.floor(Math.random() *canvas.width*20 +canvas.width/2+100);
+			var enemyY = 605;
+		}else{
+			var enemyX = Math.floor(Math.random() *canvas.width*20 +canvas.width/2+100);
+			var enemyY = Math.floor(Math.random() *canvas.height/2);
+		}
+		enemies[i] = [enemyX,enemyY,enemyType, alive];
+	}
+	//Generates random rings placement within sky/floor position
+	rings = new Array();
+	for(var i = 0; i < 100; i++) {	
+		var up = true;
+		var ringX = Math.floor(Math.random() *canvas.width*20 +canvas.width/2+10);
+		var ringY = Math.floor(Math.random() *600);
+		rings[i] = [ringX,ringY,up];
+	}	
+	//Sorts arrays by x values
+	enemies.sort(sortByX);
+	rings.sort(sortByX);
+	//Initializing all audio
+	theme = document.getElementById("sanicTheme");
+	theme.volume = 0.03;
+	theme.loop = true;
+	getRing = document.getElementById("getRing");
+	getRing.volume = 0.1;
+	loseRing = document.getElementById("loseRing");
+	loseRing.volume = 0.1;
+	downCharge = document.getElementById("downCharge");
+	downCharge.volume = 0.1;
+	enemyDefeated = document.getElementById("enemyDefeated");
+	enemyDefeated.volume = 0.1;
+	sanicDead = document.getElementById("sanicDead");
+	sanicDead.volume = 0.1;
+	gameOverTheme = document.getElementById("gameOverTheme");
+	gameOverTheme.volume = 0.1;
+	//Initializing all images
+	sanic = document.getElementById("sanic");
+	sanicRoll = document.getElementById("sanicRoll");
+	ring = document.getElementById("ring");
+	enemy1 = document.getElementById("enemy1");
+	enemy2 = document.getElementById("enemy2");
+	enemy3 = document.getElementById("enemy3");
+	background1 = document.getElementById("background1");
+	background2 = document.getElementById("background2");
+	//Plays theme and gamestart
+	theme.play();
+	gameStart();
+}
+
+
+
+function drawScore(){
+	if(ringsAmount > maxRings){
+		maxRings = ringsAmount;
+	}
+	score = maxRings + killCount;
+	context.font = "40px Arial";
+	context.fillStyle="#FF0000";
+	context.textAlign = "right";
+	context.fillText("Score: " + score,canvas.width,30);
+	context.drawImage(ring, 5, 8, ringSize, ringSize);
+	context.fillText(": ",58,33);
+	context.textAlign = "left";
+	context.fillText(ringsAmount,50,36);
+}
+
+function gameStart(){
+	frame++;
+	if(gameOver){
+		endGame();
+		return;
+	}
+	draw();
+	movement();
+	enemyAndRingMovement();
+	checkMovement();
+	requestAnimationFrame(gameStart);
+}
+
+function endGame(){
+	sanicDead.pause();
+	theme.pause();
+	gameOverTheme.play();
+	context.fillStyle = "#FF0000";
+	context.textAlign = "center"; 
+	context.fillText("Game Over",canvas.width/2,canvas.height/4);
+	context.fillText("Score: " + score,canvas.width/2,canvas.height/4+35);
+	ringsAmount = 0;
+	killCount = 0;
+	gameOver = false;
+}
+
+function draw(){
+	//Clears canvas
+	context.clearRect(0, 0, canvas.width, canvas.height);
+	//Draws background
+	context.drawImage(background2, 0, 0, 800, 700);
+	context.drawImage(background1, 0, 640, 800, 160);
+	//Draws enemies and rings
+	rings.forEach(drawRings);
+	droppedRings.forEach(drawRings);
+	enemies.forEach(drawEnemies);
+	//Draws character if down or not down.
+	if(!down){
+		context.drawImage(sanic, x-size/2,y-size/2 , size, size);
+	}else{
+		context.drawImage(sanicRoll, x-rollSize/2,y-rollSize/2, rollSize, rollSize);
+	}
+	//Draws score
+	drawScore();
+}
+
+function drawEnemies(arr){
+	if(arr[3]){
+		if(arr[2] == 1){
+			context.drawImage(enemy1, arr[0]-enemy1Size/2, arr[1]-enemy1Size/2, enemy1Size+50, enemy1Size);
+		}else{
+			if(arr[2] == 2){
+				context.drawImage(enemy2, arr[0]-enemy2Size/2, arr[1]-enemy2Size/2, enemy2Size, enemy2Size);
+			}else{
+				if(arr[2] == 3){
+					context.drawImage(enemy3, arr[0]-enemy3Size/2, arr[1], enemy3Size, enemy3Size);
+				}
+			}
+		}
+	}
+}
+
+function drawRings(arr){
+	if(arr[2]){
+		context.drawImage(ring, arr[0], arr[1], ringSize, ringSize);
+	}
+}
+
+function spawnRings(amount){
+	droppedRings = new Array();
+	for(var i = 0; i < amount; i++) {	
+		var up = true;
+		var ringX = Math.floor(Math.random() * ((x+200) - (x-200))) + x-200;
+		var ringY = Math.floor(Math.random() *600);
+		droppedRings[i] = [ringX,ringY,up];
+	}
+	droppedRings.forEach(drawRings);
+}
+
+function enemyAndRingMovement(){
+	enemies.forEach(objectMovement);
+	rings.forEach(objectMovement);
+	droppedRings.forEach(objectMovementWithGravity);
+}
+
+function objectMovementWithGravity(arr, index){
+	var tempX = Math.floor(Math.random() *canvas.width*20 +canvas.width+10);
+	if(arr[1] < 600+ringSize){
+		arr[1] += 1;
+	}
+	if(score > 5){
+		arr[0] -= Math.floor(score/5);
+	}else{
+		arr[0] -= 1;
+	}
+	if(arr[0] < -100){
+		arr[0] = tempX;
+	}
+}
+
+function objectMovement(arr, index){
+	var tempX = Math.floor(Math.random() *canvas.width*20 +canvas.width+10);
+	if(score > 5){
+		if(score < 50){
+			arr[0] -= Math.floor(score/5);
+		}else{
+			arr[0] -= 10;
+		}
+	}else{
+		arr[0] -= 1;
+	}
+	if(arr[0] < -100){
+		arr[0] = tempX;
+	}
+	if(!arr[3]){
+		arr[3] = true;
+		arr[0] = tempX;
+	}
+	if(!arr[2]){
+		arr[2] = true;
+		arr[0] = tempX;
+	}
+}
+
+function sortByX (a, b) {
+  return  a[0] -  b[0]
+}
+
+function checkMovement(){
+	//Checks if you kill or get hurt by an enemy and increase/decreases score
+	enemies.forEach(function(arr) {
+	var xBool = x >= arr[0]-size/2 && x <= arr[0]+size/2;
+	var yBool = y >= arr[1]-size/2 && y <= arr[1]+size/2;
+	var xBoolRoll = x >= arr[0]-rollSize/2 && x <= arr[0]+rollSize/2;
+	var yBoolRoll = y >= arr[1]-rollSize/2 && y <= arr[1]+rollSize/2;
+		if(!down){
+			if(xBool && yBool && arr[3]){
+				checkMovementHelper(arr);	
+			}
+		}else{
+			if(xBoolRoll && yBoolRoll && arr[3]){
+				if(downHit){
+					velY-=25;
+					enemyDefeated.play();
+					killCount++;
+					arr[3] = false;
+				}else{
+					checkMovementHelper(arr);
+				}
+			}
+		}
+	});
+	//Checks if acquired ring and increases score
+	rings.forEach(ringMovement);
+	droppedRings.forEach(ringMovement);
+}
+
+function checkMovementHelper(arr){
+	if(ringsAmount > 0){
+		loseRing.play();
+		spawnRings(ringsAmount);
+		ringsAmount = 0;
+		arr[3] = false;
+	}else{
+		if(life > 0){
+			sanicDead.play();
+			arr[3] = false;
+		}else{
+			gameOver = true;
+		}						
+	}	
+}
+
+function ringMovement(arr){
+	var xBool = x >= arr[0]-size/2 && x <= arr[0]+size/2;
+	var yBool = y >= arr[1]-size/2 && y <= arr[1]+size/2;
+	var xBoolRoll = x >= arr[0]-rollSize/2 && x <= arr[0]+rollSize/2;
+	var yBoolRoll = y >= arr[1]-rollSize/2 && y <= arr[1]+rollSize/2;
+	if(!down){
+		if(xBool && yBool && arr[2]){
+			getRing.pause();
+			getRing.currentTime = 0;
+			getRing.play();
+			ringsAmount++;
+			arr[2] = false;
+		}
+		}else{
+			if(xBoolRoll && yBoolRoll && arr[2]){
+				getRing.play();
+				ringsAmount++;
+				arr[2] = false;
+			}	
+		}
+}
+
+
+function movement() {
+   //SPACE
+   if (key[32]) {
+		if (jumpCD) {
+			if (velY > -jumpSpeed) {
+				if(jump < maxJump){
+					down = true;
+					jumpBol = true;
+					downHit = true;
+					velY-= 5;
+					jump++;
+				}
+			}
+		}
+	}
+    //SPACE
+	if (!key[32]) {
+		jump = maxJump+1;
+		jumpCD = true;
+	}
+	//DOWN
+	
+	if (key[40] && !jumpBol) {
+		down = true;
+		//downHit = false;
+		if (key[17]) { //CTRL
+			down = true;
+			downCharge.play();
+			setTimeout(function(){ charge = true; }, 500);
+		}else{
+			if(frame % 20 == 0){
+				downCharge.currentTime = 0;
+				downCharge.pause();
+				charge = false;
+			}
+			
+		}
+	}
+	//CTRL && DOWN && if not jumping
+	if (!key[17] && !key[40] && !jumpBol){
+		down = false;
+	}
+	//RIGHT
+    if (key[39]) {
+        if (velX < speed) {
+			if(charge){
+				velX += 20
+				downHit = true;
+				charge = false;
+			}
+            velX++;
+        }
+    }
+	if (!key[39] && !key[37] && !jumpBol) {
+		downHit = false;
+	}
+	//LEFT
+    if (key[37]) {
+        if (velX > -speed) {
+			if(charge){
+				velX -= 20
+				downHit = true;
+				charge = false;
+			}
+			velX--;
+        }
+    }
+	//If not in down state use size, if true use rollSize
+	if(!down){
+		jumpHeight = size/2;
+		if(y < canvas.height-size/2 ){
+			velY+= .6;
+		}
+		velY *= friction;
+		y += velY;
+		velX *= friction;
+		x += velX;
+		if (x >= canvas.width-size/2) {
+			x = canvas.width-size/2;
+		} else if (x <= size/2) {
+			x = size/2;
+		}
+		if (y > canvas.height-135-size/2) {
+		   y = canvas.height-135-size/2;
+		   setTimeout(function(){ jump = 0; }, 150);
+		   
+		   jumpBol = false;
+		   downHit = false;
+		   
+		}else{ 
+			if (y <= jumpHeight-size) {
+				y = jumpHeight-size;
+			}
+		}
+   }else{
+		jumpHeight = rollSize/2;
+		if(y < canvas.height-rollSize/2 ){
+			velY+= .6;
+		}
+		velY *= friction;
+		y += velY;
+		velX *= friction;
+		x += velX;
+		if (x >= canvas.width-rollSize/2) {
+			x = canvas.width-rollSize/2;
+		} else if (x <= rollSize/2) {
+			x = rollSize/2;
+		}
+		if (y > canvas.height-145-rollSize/2) {
+		   y = canvas.height-145-rollSize/2;
+		   setTimeout(function(){ jump = 0; }, 150);
+		   jumpBol = false;
+		}else {
+			if (y <= jumpHeight-rollSize) {
+				y = jumpHeight-rollSize;
+			}
+		}
+   }
+}
+</script>
+</body>
+</HTML>

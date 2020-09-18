@@ -1,0 +1,275 @@
+<HTML>
+<meta charset="utf-8"/>
+<head></head>
+
+<body>
+
+<table>
+<tr><td>Translation</td></tr>
+<tr>
+    <td></td><td>t<small>x</small>: </td><td><input type='text' size=1 id='tx' value='0'> <td> 
+    <td></td><td>t<small>y</small>: </td><td><input type='text' size=1 id='ty' value='0'> <td> 
+</tr>
+
+<tr><td>Scale</td></tr>
+<tr>
+    <td></td><td>s<small>x</small>: </td><td><input type='text' size=1 id='sx' value='1'> <td> 
+    <td></td><td>s<small>y</small>: </td><td><input type='text' size=1 id='sy' value='1'> <td> 
+</tr>
+
+<tr><td>Rotation</td></tr>
+<tr>
+    <td></td><td>theta: </td><td><input type='text' size=1 id='theta' value='0'> <td> 
+</tr>
+<tr><td>
+<input type=button value="transform" onclick="refresh()">
+</td></tr>
+
+</table>
+
+
+<canvas id="canvas" width="500" height="500" style="border: 1px solid black"></canvas>
+
+
+
+
+<script>
+
+
+var canvas = document.getElementById("canvas");
+var context = canvas.getContext("2d");
+
+// change the transformation stack
+// NOTICE: this affects the viewport transformation
+context.translate(canvas.width/2, canvas.height/2);
+context.scale(canvas.width/10, canvas.height/10);
+context.lineWidth=0.02;
+
+var T, S, R; // translation, sclae and rotation matrices 
+var g = []; // array containing the geometry vertices 
+
+
+refresh();
+
+function initialize_empty_js_matrices() {
+    T = [];
+    S = [];
+    R = [];
+}
+
+
+// this function draws axes
+function draw_axes() {
+    context.moveTo(-5, 0);
+    context.lineTo(5, 0);
+    context.stroke();
+    context.moveTo(0, -5);
+    context.lineTo(0, 5);
+    context.stroke();
+    for(var x = -5; x<=5; x+=0.5)
+    {   
+        context.moveTo(x, -0.1);
+        context.lineTo(x, 0.1);
+        context.stroke();
+        context.moveTo(-0.1, x);
+        context.lineTo(0.1, x);
+        context.stroke();
+    }   
+	context.font = "1px Times New Roman";
+	context.fillText("+x",3.5,0);
+	context.fillText("+y",0,4.5);
+
+} 
+
+
+// this function creates the geometry
+function create_geometry() {
+
+	g = [];
+    // create a square
+    g.push(new Float32Array([3, 3, 1]));
+    g.push(new Float32Array([-3, 3, 1]));
+    g.push(new Float32Array([-3, -2, 1]));
+    g.push(new Float32Array([3, -2, 1]));
+
+	// roof
+    g.push(new Float32Array([-3, -2, 1]));
+    g.push(new Float32Array([0, -4.5, 1]));
+    g.push(new Float32Array([3, -2, 1]));
+
+    // create a 36 point ellipse
+    for(var i = 0; i<36;i ++ )
+    {   
+        g.push(new Float32Array([Math.cos(i*10*Math.PI/180.0),1+1.5*Math.sin(i*10*Math.PI/180.0), 1]));
+    }   
+}
+
+
+
+// this function draws the geometry
+function draw_geometry() {
+    //first 4 points define a square
+    context.moveTo(g[0][0], g[0][1]);
+    for(var i = 1; i<6; i++)
+    {
+        context.lineTo(g[i][0], g[i][1]);
+        context.moveTo(g[i][0], g[i][1]);
+    }   
+    context.lineTo(g[3][0], g[3][1]);
+    context.moveTo(g[3][0], g[3][1]);
+    context.lineTo(g[0][0], g[0][1]);
+    context.stroke();
+
+    // rest of g are the ellipse vertices 
+    context.moveTo(g[7][0], g[7][1]);
+    for(var i = 7; i<g.length; i++)
+    {
+        context.lineTo(g[i][0], g[i][1]);
+        context.moveTo(g[i][0], g[i][1]);
+    }   
+    context.moveTo(g[7][0], g[7][1]);
+    context.lineTo(g[g.length-1][0], g[g.length-1][1]);
+    context.stroke();
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+////////// begin here ////////////////////////////////////////////////////////////
+
+
+// this is the matrix multiply function from assignment 1
+function multiply(A, B) {
+		var r1 = parseFloat(A.length);
+		var c1 = parseFloat(A[0].length);
+		var r2 = parseFloat(B.length);
+		var c2 = parseFloat(B[0].length);
+		
+		if(c1!=r2){
+			alert("Matrices not comformable");
+			return;
+		}
+		
+		var r3 = r1;
+		var c3 = c2;
+		
+		var C = [];
+ 		for(var r = 0; r <r3; r++) {
+			C[r] = [];
+			for(var c = 0; c <c3; c++){
+				C[r][c] = 0;
+				for (var i = 0; i <r2; i++){
+					C[r][c] += (A[r][i] * B[i][c]);
+				}
+			}
+		}
+        return C;
+}
+
+
+
+// this function reads the HTML input boxes and creates (populates) 
+// matrices T, S, and R. Keep in mind that these have to 
+// work with your multiply() function 
+function create_matrices_from_HTML() {
+    //first the translation
+	initialize_empty_js_matrices();
+	// parse the parameters from HTML input boxes
+	var tx = parseFloat(document.getElementById('tx').value);
+	var ty = parseFloat(document.getElementById('ty').value);
+	var sx = parseFloat(document.getElementById('sx').value);
+	var sy = parseFloat(document.getElementById('sy').value);
+	var theta = parseFloat(document.getElementById('theta').value);
+	// create and populate T, S and R
+	for(var r = 0; r < 3; r++) {
+		R[r] = [];
+		S[r] = [];
+		T[r] = [];
+		for(var c = 0; c < 3; c++){
+			R[r][c] = 0;
+			S[r][c] = 0;
+			T[r][c] = 0;
+		}
+	}
+	
+	R[0][0] = Math.cos(theta * Math.PI / 180.0);
+	R[0][1] = (0-Math.sin(theta * Math.PI / 180.0));
+	R[1][0] = Math.sin(theta * Math.PI / 180.0)
+	R[1][1] = Math.cos(theta * Math.PI / 180.0);	
+	R[2][2] = 1;
+	
+	S[0][0] = sx;
+	S[1][1] = sy;
+	S[2][2] = 1;
+	
+	//Correct matrix wasn't working couldn't find out why. with this matrix it moves all points by 2(tx) or 2(ty)
+	//So i need to divide tx and ty by 2 to account for it.
+	T[0][0] = 1;
+	T[2][0] = tx/2;
+	T[1][1] = 1;
+	T[2][1] = ty/2;
+	T[2][2] = 1;
+	
+	/*
+	This wasn't working for some reason?
+	T[0][0] = 1;
+	T[0][2] = tx;
+	T[1][1] = 1;
+	T[1][2] = ty;
+	T[2][2] = 1;
+	*/
+	
+	
+	
+	
+	
+    
+
+}
+
+// this function applies the transformations (R, S and T, in that order)
+// on all vertices stored in g
+function apply_transforms() {
+	//Assignment Sheet says Rotation, Translation then Scale.
+	g = multiply(g, R);
+	g = multiply(g, T);
+	g = multiply(g, S);	
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+////////// end here //////////////////////////////////////////////////////////////
+
+
+
+
+// this function is called at start-up and when the user clicks "transform"
+function refresh() {
+    create_matrices_from_HTML();
+
+	context.beginPath();
+	context.fillStyle = "#ff0000";
+	context.clearRect(-5, -5, 10, 10);
+	context.fill();
+	context.closePath();
+
+	draw_axes();
+	create_geometry();
+	apply_transforms();
+	draw_geometry();
+	
+}
+
+
+
+
+</script>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<HTML>
+<meta charset="utf-8"/>
+<head><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.18.0/math.min.js"></script></head>
+<body>
+<canvas id="canvas" width="800" height="800" style="border: 1px solid black"></canvas>
+<img id='houses' src="http://www.clker.com/cliparts/n/y/e/0/6/K/simple-cartoon-house-md.png" hidden=true>
+<img id='chests' src="http://www.clker.com/cliparts/k/P/5/F/6/P/treasure-chest-md.png" hidden=true>
+<div id= "description" width="80%"style="float: left; border:1px solid black;" >
+<h2>Treasure Hunter</h2>
+<p>
+Controls:<br>
+W: Forward<br>A: Left<br>S: Backwards<br>D: Right<br>Q: Strafe Left<br>E: Strafe Right<br><br>
+Find all 5 chest to complete the game.<br><br>
+Description:<br>
+As you walk towards a house, if there is a chest inside that house one will <br>
+appear. Walk into the chest to increase your score by 1.
+</p>
+</div>
+<script>
+//Initialize all global values
+"use strict";
+var canvas = document.getElementById("canvas");
+var context = canvas.getContext("2d");
+context.font = "30px Arial";
+context.fillStyle = "#FFFFFF";
+
+var x, y, z, score, scale, house, chest, houseImage, chestImage, gameCompleted, m, t, s;
+var numObjects  = 20;
+//Window To Viewport Transformation
+context.translate(canvas.width/2, canvas.height/2);
+context.scale(canvas.width/2, canvas.height/2);
+//Initialize function
+init();
+
+function init() {
+	//Iinitialize canvas and set score to 0;
+	canvas = document.getElementById("canvas");
+	score = 0;
+	gameCompleted = false;
+	//creates house array
+	house = new Array();
+	for(var i = 0; i < numObjects; i++) {	
+		//Creates house objects with random x and z values.
+		//For every 4th house sets 4th value to 1, this value determines chest location.
+		if(i%4 == 0){
+			var location = math.matrix([(Math.random() * 2 - 1) * 20, 0 ,Math.random() * 10 , 1]);
+		}else{
+			var location = math.matrix([(Math.random() * 2 - 1) * 20, 0 ,Math.random() * 10 , 0]);
+		}
+		//pushes matrix into house array
+		house.push(location);
+	}
+	//Event listener for key press
+	document.addEventListener("keydown", doKeyDown, false);
+    //Loads house and chest image, after completing both runs drawScene function.
+	houseImage = document.getElementById("houses");	
+	houseImage.onload = function imageLoaded() {
+		chestImage = document.getElementById("chests");
+		chestImage.onload = function imageLoaded() {
+			drawScene();
+		}
+	}	
+	drawScene();
+}
+ 
+function turn (){
+	//Determines if turning left or right
+	if(t < 0){
+		var theta = -2 * (Math.PI / 180.0);
+			for(var i =0; i < house.length; i++){
+				//Takes x z and w values and stores them
+				var tempX = math.subset(house[i], math.index(0));
+				var tempZ = math.subset(house[i], math.index(2));
+				var tempW =  math.subset(house[i], math.index(3));
+				//Using theta calculates y axis rotation
+				tempX = tempX * Math.cos(theta) + tempZ * -Math.sin(theta)
+				tempZ = tempX * Math.sin(theta) + tempZ * Math.cos(theta); 
+				//input new values of x and z into matrix array
+				house[i] = math.matrix([tempX, 0, tempZ, tempW]);
+			}
+	}else{
+		var theta = 2 * Math.PI / 180.0;	
+			for(var i =0; i < house.length; i++){
+				//Takes x z and w values and stores them
+				var tempX = math.subset(house[i], math.index(0));
+				var tempZ = math.subset(house[i], math.index(2));
+				var tempW =  math.subset(house[i], math.index(3));
+				//Using theta calculates y axis rotation
+				tempX = tempX * Math.cos(theta) + tempZ * -Math.sin(theta)
+				tempZ = tempX * Math.sin(theta) + tempZ * Math.cos(theta); 
+				//Input new values of x and z into matrix array
+				house[i] = math.matrix([tempX, 0, tempZ, tempW]);
+			}
+	}
+ }
+
+function strafe(){
+	//Determines if strafing left or right
+	if(s > 0){
+		for(var i =0; i < house.length; i++){
+			//Takes x z and w values and stores them
+			var tempX = math.subset(house[i], math.index(0));
+			var tempZ = math.subset(house[i], math.index(2));
+			var tempW =  math.subset(house[i], math.index(3));
+			//Changes tempX to match distance and direction of strafe.
+			tempX = tempX - 0.1;
+			//Input new values of x into matrix array
+			house[i] = math.matrix([tempX, 0, tempZ, tempW]);
+		}
+	}else{
+		for(var i =0; i < house.length; i++){
+			//Takes x z and w values and stores them
+			var tempX = math.subset(house[i], math.index(0));
+			var tempZ = math.subset(house[i], math.index(2));
+			var tempW =  math.subset(house[i], math.index(3));
+			//Changes tempX to match distance and direction of strafe.
+			tempX = tempX + 0.1;
+			//Input new values of x into matrix array
+			house[i] = math.matrix([tempX, 0, tempZ, tempW]);
+		}
+	}
+}
+
+function move (){
+	//Determines if moving forward or backwards
+	if(m < 0){
+		for(var i =0; i < house.length; i++){
+			//Takes x z and w values and stores them
+			var tempX = math.subset(house[i], math.index(0));
+			var tempZ = math.subset(house[i], math.index(2));
+			var tempW =  math.subset(house[i], math.index(3));
+			//Changes tempZ to match distance and direction of movement.
+			tempZ = tempZ- 0.1;
+			//Input new values of z into matrix array
+			house[i] = math.matrix([tempX, 0, tempZ, tempW]);
+		}
+	}else{
+		for(var i =0; i < house.length; i++){
+			//Takes x z and w values and stores them
+			var tempX = math.subset(house[i], math.index(0));
+			var tempZ = math.subset(house[i], math.index(2));
+			var tempW =  math.subset(house[i], math.index(3));
+			//Changes tempZ to match distance and direction of movement.
+			tempZ = tempZ + 0.1;
+			//Input new values of z into matrix array
+			house[i] = math.matrix([tempX, 0, tempZ, tempW]);
+		}
+	}
+}
+ 
+function drawScene(){
+	//Checks if score is 5, if not draws images
+	if(!gameCompleted){
+		//Clears context
+		context.fillRect(-1,-1,2,2); 
+		//Draws the background
+		drawBackground();
+		//Sorts house matrix array by depth (depth testing)
+		math.sort(house, sortByDepth);
+		//Draws images
+		for(var i =0; i < house.length; i++){
+			//If object is "behind", it does not drawImage.
+			if(math.subset(house[i], math.index(2)) > 0){
+				//Sets basic variables. 
+				var scale = 1/math.subset(house[i], math.index(2));
+				var tX = math.subset(house[i], math.index(0))/math.subset(house[i], math.index(2));
+				y = 0;
+				//Boolean variables, true if object is upclose to "camera"
+				var x = math.subset(house[i], math.index(0)) < 0.38 &&  math.subset(house[i], math.index(0)) > -0.36;
+				var z = math.subset(house[i], math.index(2)) < 0.5;
+				var w = math.subset(house[i], math.index(3)) > 0;
+					//If object is close to camera draws chest instead of house, uses w variable to determine if chest is present.
+					if(z  &&  x && w){
+						context.drawImage(chestImage, tX-(scale/2), y-(scale/2), scale, scale);
+					}else{
+						context.drawImage(houseImage, tX-(scale/2), y-(scale/2), scale, scale);
+					}
+			}
+		}
+		//Draws score on top right of canvas
+		drawScore();	
+	}else{
+		//Draws game completion text
+		gameDone();
+	}
+} 
+
+function sortByDepth (a, b) {
+  //Sorts values from highest to lowest
+  return  math.subset(b, math.index(2)) -  math.subset(a, math.index(2))
+}
+
+function checkCollision(){
+	//If chest is near/on camera increases score and removes chest.
+	for(var i =0; i < house.length; i++){
+		if(math.subset(house[i], math.index(2)) > 0){
+			var x = math.subset(house[i], math.index(0)) < 0.38 &&  math.subset(house[i], math.index(0)) > -0.36;
+			var z = math.subset(house[i], math.index(2)) < 0.5;
+			var w = math.subset(house[i], math.index(3)) > 0;
+				if(z  &&  x && w){
+					score++;
+					house[i] = math.matrix([math.subset(house[i], math.index(0)), 0, math.subset(house[i], math.index(2)), 0]);
+				}
+		}
+	}
+	//if score is 5 set gameCompleted to true
+	if(score > 4){
+		gameCompleted = true;
+	}
+}
+
+function drawScore(){
+	context.font = "1px Arial";
+	context.save();
+	context.scale(0.1, 0.1);
+	context.fillStyle="#000000";
+	context.textAlign = "center";
+	context.fillText("Score: " + score,8,-9);
+	context.restore();
+}
+
+function gameDone(){
+	context.fillRect(-1,-1,2,2); 
+	context.font = "1px Arial";
+	context.save();
+	context.scale(0.1, 0.1);
+	context.fillStyle="#000000";
+	context.textAlign = "center";
+	context.fillText("Congratulations",0,-1);
+	context.fillText("You have completed the game",0,0);
+	context.fillText("Press enter to reset game.",0,1);
+	context.restore();
+}
+
+function drawBackground() {
+	// Create gradient
+	var grd1 = context.createLinearGradient(0,0,0,1);
+	grd1.addColorStop(0,"white");
+	grd1.addColorStop(1,"green");
+
+	// Fill with gradient
+	context.fillStyle = grd1;
+	context.fillRect(-1,1,2,-1);
+
+	// Create gradient
+	var grd2 = context.createLinearGradient(0,0,0,-1);
+	grd2.addColorStop(0,"white");
+	grd2.addColorStop(1,"blue");
+
+	// Fill with gradient
+	context.fillStyle = grd2;
+	context.fillRect(-1,0,2,-1);
+} 
+ 
+function doKeyDown(evt) {
+	var code = evt.keyCode;  // Numerical code for key that was pressed.
+    switch (code) {
+		case 65:  // A key
+			t = -1;
+			turn();
+			drawScene();
+			checkCollision();
+			break;
+		case 68:  // D key
+			t = 1;
+			turn();
+			drawScene();
+			checkCollision();
+			break;		
+		case 87:  // W key
+			m = -1;
+			move();
+			drawScene();
+			checkCollision();
+			break;
+		case 83:  // S key
+			m = 1;
+			move();
+			drawScene();
+			checkCollision();
+			break;
+		case 81:  // Q key
+			s = -1;
+			strafe();
+			drawScene();
+			checkCollision();
+			break;	
+		case 69:  // E key
+			s = 1;
+			strafe();
+			drawScene();
+			checkCollision();
+			break;
+		case 13:  // Enter key
+			//Resets the game if game is completed
+			if(gameCompleted){
+			init();
+			}
+			break;	
+		default:
+			break;
+    }
+}
+
+</script>
+</body>
+</html>
