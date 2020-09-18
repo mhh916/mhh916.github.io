@@ -1,0 +1,430 @@
+//A log for all changes made to the project
+
+//Format:
+//Month/Day/Year
+//Programmer Name:
+//Programmer Commit #:
+//
+//  Changes made/sources if used.
+
+Jan/22/2020
+Ryan Slaybaugh:
+Commit 1:
+
+  Added three planes for player movement testing. Also added collision physics for player interaction.
+Attempted to create two ramps out of two of the planes but ran into issues with collision phyics. Still
+unresolved. Sources for collision physics code is the same code used for the base plane currently in the
+main code provided by Michael. Main purpose of this code is to get a better understanding of collision 
+physics and object placement. No plans to use this code in final build.
+
+Jan/23/2020
+Michael Hayes
+Commit 289654a9509b837736ffe677165b2b500313dc78
+
+Merged my branch with Ryans changes. 
+
+Jan/24/2020
+Ryan Slaybaugh:
+Commit 2:
+
+  Added two new objects, a box and a ramp. The box provides collision for player character movement testing
+such as jumping. The ramp has a rotated collision box, but there are a few issues that need to be worked out, 
+such as imperfect alignment with visual ramp and awkward friction for player movement. Collision code recycled
+from previous object collision code.
+
+
+Jan/25/2020
+Ryan Slaybaugh
+Commit 3:
+
+  Moved createObstacles() code to a new file named gamestage.js and renamed function call to createGameStage().
+Added a function called createTestGround() for the obstacle objects and a createDynamicGround() for new platform 
+testing inside the createGameStage() function. createDynamicGround() currently adds 10 new 5x2x5 cubes in 
+preparation for object movement testing. Tidied up code for already created objects to make it easier to 
+differentiate between objects. No collision code added to the squares.
+
+
+Jan/26/2020
+Ryan Slaybaugh
+Commit 4:
+
+  Tested out creating objects using a for loop. I first created a var str called box, and then used the iterative
+number from the for loop and concatenated it to str box. This creates new a new numbered box string. Then I created 
+objects using this str and manipulated the position with some math to place each object in a different location. I also
+created a flat collision plane to encompass all 10 boxes, rather than creating an individual collision plane for each box.
+
+
+Jan/28/2020
+Michael Hayes
+Commit 5736b7705927b67cf36675919cf328ba9842774c
+
+Background music was added to the game. 
+Known issues: Background music does not play when clicking to play too quickly.
+Possible Solution: Create a loader to preload everything before calling functions to draw scene.
+
+
+Jan/28/2020
+Michael Hayes
+Commit 0c6e72d20cc2ce57bd0c49827304181098e30cc0
+
+Added stats js to the game. This will allow us to track the FPS of the game and see how new additions affect framerate. 
+Known issues: None
+Possible Solution: None.
+
+
+Jan/28/2020
+Michael Hayes
+Commit 4d404366deacad46d2d87032bd86e3030aa749a7
+
+Added code for stats js. Linked the camera to the player object. This allows the camera to move to the positions of the playerobject
+as to keep the physics of the player object. Following the player object with the camera is the best way to implement First Person. 
+Known issues: Currently the camera is stationary and cannot be moved with pointerlock controls.
+Possible Solution: Change directional movement based on the angular change of the camera with pointerlock controls.
+
+Jan/28/2020
+Michael Hayes
+Commit 37d9d26a6a245db2e9121215c95a96b47c0f8686
+
+Added a jump feature to player movement.
+Known issues: Jump needs to be disabled when in air and so does movement.
+Possible Solution: Use collision handler to determine when the player is on the ground or object to enable jump, and disable jump 
+after pressing jump key. Disable movement while player does not have any collisions.
+
+Jan/28/2020
+Ryan Slaybaugh:
+Commit 5:
+
+  Added a new torus object to be used for future starting platform. Also attempted to add objects to scene after render, but currently
+does not work. Will test further for a solution. Also updated the index.html file, adding <script src="./game/main.js"></script>, in
+order for the program to register the gamestage.js file.
+
+1/29/2020
+Semira Pinder:
+Commit 1:
+I added a loader for the models that we will use later in the game, and I added an enemy model to test it (The model's incomplete,
+though.
+
+1/29/2020
+Semira Pinder
+Commit 2:
+Added a loading percentage in the middle center of the screen while it loads a model. After it hits 100%,
+it clears the message.
+
+1/29/2020
+Semira Pinder
+Commit 3:
+Prevented the event listeners for starting the game from being added before the model(s) are loaded in, so the game doesn't start
+before the model(s) are loaded in. Also added text for the loader if it runs into an error.
+
+1/30/20
+Semira Pinder
+Commit 4:
+Added texture paint to the catGun.obj model by selecting all the verticies in the UV Editing, right-clicking the left screen and pressing unwrap. Then I could draw and edit on 
+it with the tab Texture Paint.
+
+Jan/30/2020
+Michael Hayes
+Commit 07fc44ad710f667dcbffd45ef086d9168b767963 AND bf11da97e08fe664c3a03d9d3c29ab961f0ef57f
+
+Added code so that different types of objects have their own loader. Each loader is tied to one another to load specific fragments
+of the game. That way we can see what exactly has an issue loading and give a more interesting loading screen to look at. Edited CSS 
+to include features to hide loading text when done loading and to hide instructions when loading.
+Known issues: When loading screen does not properly resize and has scrollbars.
+Possible Solution: Edit CSS to format the load ID to fit and resize into the screen.
+
+1/30/20
+Semira Pinder
+Commit 5:
+Added texture loader to the main javascript program for the catGun.obj model. Also changes the position of the model in the game so the changes are easier to see.
+
+Jan/30/2020
+Michael Hayes
+Commit 37d9d26a6a245db2e9121215c95a96b47c0f8686
+Changed movement keys from arrows to wasd and edited jump height.
+Known issues: Jump needs to be disabled when in air and so does movement.
+Possible Solution: Use collision handler to determine when the player is on the ground or object to enable jump, and disable jump 
+after pressing jump key. Disable movement while player does not have any collisions.
+
+
+Jan/31/2020
+Ryan Slaybaugh:
+Commit 6:
+
+  Removed initial testing area to begin work on level creation. Created a large platform as the base with a simple texture and
+a lone building to start the player out on. Also implemented textures for the building though they are not final.
+
+
+Jan/31/2020
+Ryan Slaybaugh:
+Commit 7:
+
+  Added createSkyBox() function to level1.js to create a sky box. I found a cubemap online for free to use as a place holder
+until we decide on an official skybox.
+
+Jan/31/2020
+Ryan Slaybaugh:
+Commit 8:
+
+  Added createCityScape() function to level1.js to randomly generate a city for player movement testing. Level design will be put on hold while
+I begin work on a start menu for our game.
+
+
+Feb/2/2020
+Ryan Slaybaugh:
+Commit 9:
+
+  Added new functions start_Menu() and start_Menu_Loader() to handle the start menu and I renamed the loaders() function to object_Loader(),
+and loadSounds() to sound_Loader(). I created a new function called load_Manager() to handle the separation of loaders. I also added code
+to the start_Menu() function to create a basic layout for the menu including a header called Grappling Game, a Select Level button, an Options
+button, and an Exit Game button. They do not have any raycasting or event handlers associated with them yet so for now they are just static
+objects.
+
+
+Feb/2/2020
+Ryan Slaybaugh:
+Commit 10:
+
+  Added raycasting to highlight start menu elements. Currently working on click eventlistener for selecting the elements of the main menu.
+
+
+Feb/2/2020
+Ryan Slaybaugh:
+Commit 11:
+
+  Added the ability to select menu elements. I ran into trouble attempting to delete elements from the scene after selecting Select Level
+and will continue to work on a solution to it. I have also worked to tidy up the code a bit, grouping relevant functions together with 
+appropriate headers.
+
+
+Feb/4/2020
+Ryan Slaybaugh:
+Commit 12:
+
+  Added selection functionality to the Select Level and Options buttons which will relocate the camera to the left or right of its starting
+position. I have also added Back buttons which return the camera to the original position, looking at the Main Menu. I also moved the 
+menu code to a new menu.js file, to make it easier to separate the menu, level, and core elements of the code. I also added a new font type
+for use by the text objects.
+
+
+Feb/5/2020
+Ryan Slaybaugh:
+Commit 13:
+
+  Added the ability to load level 1 from the start menu after selecting the Select Level button and then the Level 1 button. Also Repositioned
+the Select Level and Options menus to above and below the main menu respectively to account for different resolutions and prevent one menu
+appearing in another. Moved new scene creation to the load manager and added an if statement to load level 1 data from the load manager.
+Moved scene graphics initialization to the level_1.js file to consolidate level 1 items/needs.
+
+2/5/2020 (11:51 until 23:27)
+Semira Pinder
+Commit #1 of the week 
+
+Added a tail and a body to the catGun object after tweaking the vertices a large amount.
+
+2/6/2020 (23:27 pm until 00:17)
+Semira Pinder
+Commit #2 of the week
+
+Remapped the UV map and added a new texture paint for catGun.
+
+
+2/6/2020 (9:02 until 10:43)
+Semira Pinder
+Commit #3 of the week
+
+Added a skeleton to the catGun blender mesh. Didn't export it to an obj yet.
+
+2/6/2020 (11:02 until 12:58)
+Semira Pinder
+Commit #4 of the week
+
+Added a primitive walking animation, but I didn't export/render it.
+
+
+Feb/11/2020
+Ryan Slaybaugh:
+Commit 14:
+
+  Added highlighting to menu elements when hovering over them. Also changed the rotation of the Level_1_Cube to only rotate when you 
+are hovering over it. Currently it only rotates when you move the mouse on it so I will try to find a workaround so that we don't have
+to use the render frame to keep the cube rotating.
+
+
+Feb/12/2020
+Ryan Slaybaugh:
+Commit 15:
+
+  Changed around a few things about level 1, removed random city generation and manually added some "buildings" to play around with. 
+Still unsure of the direction for the level as original city design will be massively time consuming. 
+
+
+2/12/2020 (11:09pm -12:29am)
+Semira Pinder
+Commit #1 of the week
+
+Added a new skeleton to the catGun model.
+
+2/13/2020 (8:29pm-11:28pm)
+Semira Pinder
+Commit #2 of the week
+
+Added a better walking animation to the catGun model.
+
+2/13/2020 (11:31pm-12:42am)
+Semira Pinder
+Commit #3 of the week
+
+Added a shooting animation to the catGun model.
+
+3/13/2020 (10am-11:54am)
+Semira Pinder
+Commit #4 of this week
+
+Added a jumping animation to the model.
+
+3/13/2020 (12:21pm-12:24pm)
+Semira Pinder
+Commit #5 of this week (3)
+
+Exported the file as a glb type, to be used in the program later.
+
+
+Feb/16/2020
+Ryan Slaybaugh:
+Commit: 16
+
+  Fixed immediate loading of level 1 by changing level variable to 1 from 0. There were a few issues preventing level 1 from loading 
+correctly. I also added more objects to level 1 and have been working with graph paper to map out the level.
+
+
+2/19/2020 (2:35 pm - 2:45 pm)
+Semira Pinder
+Commit #1 of week 4
+
+Fixed the location to load the catGun.glb from in the object_Loader function, then changed the position of it in the game scene so it's visible.
+
+
+Feb/19/2020
+Ryan Slaybaugh:
+Commit 17:
+
+  Reworked level one, moving away from more open platforming to a more linear platform design. Also reworked building creation by creating
+a create_Box_Geometry() function with scale, pos, quat, texture, has_Boundary parameters. This allows for easy creation of box geometries
+without having to rewrite the same code over and over. I also implemented a for loop and while loop to create the boundary buildings surrounding
+the level.
+
+2/20/2020 12:38 am - 2:51 am 
+Semira Pinder
+Commit #2 of week 4
+
+After playing with the dope sheet, added a death animation for catGun and I re-exported the model in a glb format.
+
+2/20/2020 11:22 am-2:19pm
+Semira Pinder
+Commit #3 of week 4
+
+Imported animations to the game (level 1) for catGun. Death animation does not seem to work, though.
+Feb/20/2020
+Ryan Slaybaugh:
+Commit 18:
+
+  Added a basic running course for level 1. It is the beginning of level 1 but still requires much work to be a full level. Some platform
+heights will need to be adjusted as player movement is adjusted. Also changed the skybox to a cube mesh rather than a scene.background in
+order to cut off the obvious edge separating top from bottom in the skymap image.
+
+2/25/20 10:19pm-12:28am and 2/26/20 11:35 am-4:32pm
+Semira Pinder
+Commit #1 of week 5
+Made and exported a tree obj in the "objects/treePalm"
+
+2/26/20 4:40pm-4:55pm
+Semira Pinder
+Commit #2 of week 5
+
+Added a tail bone armature to the catGun.blend file that can be weighted then animated later.
+
+2/26/20 5:03pm-5:15pm
+Semira Pinder
+Commit #3 of week 5
+
+Re-weighted the armature with catGun in a way that allows the armature's tail to move the mesh's tail.
+
+2/26/20 5:16pm - 5:21pm
+Semira Pinder
+Commit #4 of week 5
+
+Changed catGun's origin so that it's aligned better.
+
+
+2/26/2020
+Ryan Slaybaugh:
+Commit 19:
+
+  Fixed a few document elements improperly showing with a scroll bar. Worked on getting in game menu and added ability to get back to the
+main menu from level 1. We have a massive performance problem, most likely a memory leak that will need to be addressed.
+
+
+3/1/2020
+Ryan Slaybaugh:
+Commit 20:
+
+  Fixed the issue with calling and stacking multiple renders by invoking cancelAnimationFrame(renderFrameId) before invoking new renderFrames.
+Also corrected cases of the camera being off center when looking at the in game menu. I moved the camera.position and camera.lookAt into the
+renderFrame so that it would constantly ensure that it was located at and looking in the correct locations.
+
+3/1/2020
+Ryan Slaybaug:
+Commit 21:
+
+  Further improved the look of the ingame menu adding in lighting to get the same color text as in the main menu.
+
+
+3/3/2020
+Ryan Slaybaugh:
+Commit 22:
+
+  Pushed the renderframe fix to level_2.js and reinitialized the physics world to flush old bounding boxes from the scene. There is currently
+an issue of being unable to move due to no other physics collisions taking place. We will need to fix this.
+
+3/4/2020 10:54 - 11:57 am
+Semira Pinder
+Commit #1 of week 6
+
+Fixed the animation loop for the cat model, but I will need to fix the death animation not playing.
+
+
+3/4/2020 8:08-9-21pm
+Semira Pinder
+Commit #2 of week 6
+
+Added a possible level design to the git
+
+3/4/2020 10:48 pm - 11:42 pm
+Semira Pinder
+Commit #3 of week 6
+
+Added a texture to the treePalm object in blender, but I need to remove internal faces and re-map the vertices to the texture later on so that it looks
+cleaner than it does now.
+
+3/5/2020 10:32am-11:28am
+Semira Pinder
+Commit #4 of week 6
+Removed face intersections for the treePalm model
+
+3/5/2020 11:28am-11:42am
+Semira Pinder
+Commit #5 of week 6
+Added a texture color image to the model using the "Face selection mask for painting" option in texture paint with the edit mode, and exported the new version 
+of the model
+
+3/5/2020 1:35-1:46pm
+Semira Pinder
+Commit #6 of week 6
+Changed the "theMixer" object to update using a THREE.Clock object
+
+
+3/5/2020
+Ryan Slaybaugh:
+Commit 23:
+
+  Created a level 2 select and level 2 cube for the select level menu, and linked level two to the buttons in the raycasting event handlers.
