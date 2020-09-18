@@ -1,0 +1,20 @@
+function createFarObject() {
+
+        var lod = new THREE.LOD();
+
+        for (var i = 2; i < 7; i+=2) {
+
+            var geometry = new THREE.SphereBufferGeometry(100, 128 / i, 128 / i);
+            var mat = new THREE.MeshPhongMaterial({ color: 0xa0afa4 });
+            var mesh = new THREE.Mesh(geometry, mat);
+
+
+            //mesh.matrixAutoUpdate = false;
+
+            lod.addLevel(mesh, i * 75);
+        }
+        lod.position.set(0, 0, -500);
+        lod.updateMatrix();
+        lod.matrixAutoUpdate = false;
+        
+        scene.add(lod);
